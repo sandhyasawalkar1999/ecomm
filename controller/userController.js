@@ -3,9 +3,8 @@ const User = require("../models/userModel");
 const asyncHandler = require("express-async-handler");
 const validateMongoDbId = require("../utilis/validateMongodbid");
 const generateRefreshToken = require("../config/refreshToken");
-
-// const refreshToken = require("../config/refreshToken");
 const jwt = require("jsonwebtoken");
+const crypto = require("crypto");
 
 //user registration
 const createUser = asyncHandler(
@@ -131,7 +130,7 @@ const logout = asyncHandler(async (req, res) => {
   return res.sendStatus(204);
 
 
-})
+});
 
 //update a user
 
@@ -157,7 +156,7 @@ const updateUser = asyncHandler(async (req, res) => {
   } catch (err) {
     throw new Error(err);
   }
-})
+});
 
 //get all users
 
@@ -173,7 +172,7 @@ const getAllUsers = asyncHandler(async (req, res) => {
   catch (error) {
     throw new Error(error)
   }
-})
+});
 
 //get a single user
 
@@ -194,7 +193,7 @@ const getUser = asyncHandler(async (req, res) => {
     throw new Error(err);
   }
 
-})
+});
 
 //delete user
 
@@ -215,7 +214,7 @@ const deleteUser = asyncHandler(async (req, res) => {
   } catch (err) {
     throw new Error(err);
   }
-})
+});
 
 //block user
 
@@ -245,7 +244,7 @@ const blockUser = asyncHandler(async (req, res) => {
   } catch (err) {
     throw new Error(err);
   }
-})
+});
 
 //unblock user
 
@@ -272,6 +271,27 @@ const unblockUser = asyncHandler(async (req, res) => {
   } catch (err) {
     throw new Error(err);
   }
-})
+});
 
-module.exports = { createUser, loginUser, updateUser, getAllUsers, getUser, deleteUser, blockUser, unblockUser, handleRefreshToken, logout };
+// user update password
+
+const updatePassword = asyncHandler(async (req, res) => {
+  const { id } = req.user;
+  const password = req.body.password;
+  validateMongoDbId(id);
+  const user = await User.findById(id);
+  if (password) {
+    user.password = password;
+    const updatePassword = await user.save();
+    res.json({
+      success: true,
+      message: "Password updated successfully",
+      user: updatePassword
+    });
+  }
+  else {
+    res.json(user);
+  }
+});
+
+module.exports = { createUser, loginUser, updateUser, getAllUsers, getUser, deleteUser, blockUser, unblockUser, handleRefreshToken, logout, updatePassword };
