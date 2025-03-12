@@ -1,3 +1,4 @@
+const { request } = require('express');
 const Product = require('../models/productModel');
 const asyncHandler = require('express-async-handler');
 const slugify = require('slugify');
@@ -49,34 +50,60 @@ const updateProduct = asyncHandler(async (req, res) => {
 
 const getAllproducts = asyncHandler(async (req, res) => {
   try {
-    //filtering product
-    const queryObj = { ...req.query }; //filter by query
-    console.log(queryObj);
+    // Copy the query parameters
+    const queryObj = { ...req.query };
+    console.log("Query Object:", queryObj);
+
+    // Exclude certain fields from filtering
     const excludeFields = ["page", "sort", "limit", "fields"];
+    excludeFields.forEach((field) => delete queryObj[field]);
 
+    // Convert query operators (gte, gt, lte, lt) to MongoDB syntax
     let queryStr = JSON.stringify(queryObj);
-    queryStr = queryStr.replace(/\b(gte| gt| lte|lt)\b/g, (match) => `$${match}`);
+    queryStr = queryStr.replace(/\b(gte|gt|lte|lt)\b/g, (match) => `$${match}`);
 
-    const queryObj2 = excludeFields.forEach((field) => delete queryObj[field]);
-
+    // Execute query
     let query = Product.find(JSON.parse(queryStr));
 
-    //sorting
-
+    // Sorting
     if (req.query.sort) {
-      const sortBy = req.query.sort.split(',').join(" "); // split the query by comma and join with blank space
+      const sortBy = req.query.sort.split(",").join(" ");
       query = query.sort(sortBy);
     } else {
-      query = query.sort("-createdAt"); // default sort by createdAt in descending order
+      query = query.sort("-createdAt");
     }
 
-    const getProducts = await Product.find({ queryObj });
+    // Limiting fields
+    if (req.query.fields) {
+      const fields = req.query.fields.split(",").join(" ");
+      query = query.select(fields);
+    } else {
+      query = query.select("-__v");
+    }
+
+    //pagination
+
+    const page = req.query.page;
+    const limit = req.query.limit;
+    const skip = (page - 1) * limit;
+    query = query.skip(skip).limit(limit);
+    // check if page exists in the database
+    if (req.query.page) {
+      const productCount = await Product.countDocuments();
+      if (skip >= productCount) throw new Error('This page does Not exist');
+    }
+    console.log(page, limit, skip);
+
+    // Fetch products
+    const getProducts = await query; // Fixed: directly using the query
+
     res.json({
       success: true,
-      getProducts
-    })
+      getProducts,
+    });
   } catch (err) {
-    throw new Error(err);
+    console.error(err);
+    res.status(500).json({ success: false, message: err.message });
   }
 });
 
