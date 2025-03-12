@@ -5,11 +5,13 @@ const authRouter = require('./routes/authRouter.js');
 const { notFound, errorHandler } = require('./middlewares/errorHandler.js');
 const cookieParser = require('cookie-parser');
 const productRouter = require("./routes/productRoute.js")
+const morgan = require('morgan');
 
 const app = express();
 
+app.use(morgan("dev")); //middleware to
 app.use(express.json()); //middleware to parse json request
-app.use(cookieParser()); //middleware to
+app.use(cookieParser()); //middleware to cookie parser
 
 
 app.use('/api/v1/user', authRouter);
