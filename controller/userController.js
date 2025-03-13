@@ -331,27 +331,27 @@ const forgetPasswordToken = asyncHandler(async (req, res) => {
 
 //reset password
 
-const resetPassword = asyncHandler(async (req, res) => {
+// const resetPassword = asyncHandler(async (req, res) => {
 
-  const {oldPassword, newPassword} = req.body;
-  const email = req.body.email;
-  const user = await User.findOne({email: email});
-  if (!user) throw new Error("User not found with this email");
-  user.password, oldPassword => bcrypt compare
-  // generate new hashed password
-  User.findOneAndUpdate({email: email}, {password: newHashedPassword})
+//   const {oldPassword, newPassword} = req.body;
+//   const email = req.body.email;
+//   const user = await User.findOne({email: email});
+//   if (!user) throw new Error("User not found with this email");
+//   // user.password, oldPassword => bcrypt compare
+//   // generate new hashed password
+//   User.findOneAndUpdate({email: email}, {password: newHashedPassword})
 
 
-  // const { password } = req.body;
-  // const { token } = req.params;
-  // const hashedToken = crypto.createHash("sha256").update(token).digest("hex");
-  // const user = await User.findOne({
-  //   passwordResetToken: hashedToken, passwordResetTokenExpiresAt: { $gt: Date.Now() }
-  // });
-  // if (!user) throw new Error("Token Expire,please try again later");
-  // user.password = password;
-  // user.passwordResetToken = undefined;
-  // user.passwordResetTokenExpiresAt = undefined;
-});
+//   // const { password } = req.body;
+//   // const { token } = req.params;
+//   // const hashedToken = crypto.createHash("sha256").update(token).digest("hex");
+//   // const user = await User.findOne({
+//   //   passwordResetToken: hashedToken, passwordResetTokenExpiresAt: { $gt: Date.Now() }
+//   // });
+//   // if (!user) throw new Error("Token Expire,please try again later");
+//   // user.password = password;
+//   // user.passwordResetToken = undefined;
+//   // user.passwordResetTokenExpiresAt = undefined;
+// });
 
 module.exports = { createUser, loginUser, updateUser, getAllUsers, getUser, deleteUser, blockUser, unblockUser, handleRefreshToken, logout, updatePassword, forgetPasswordToken };
