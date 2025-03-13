@@ -5,6 +5,8 @@ const validateMongoDbId = require("../utilis/validateMongodbid");
 const generateRefreshToken = require("../config/refreshToken");
 const jwt = require("jsonwebtoken");
 const crypto = require("crypto");
+const { sendEmail } = require("../controller/emailcontroller");
+const { compare } = require("bcrypt");
 
 //user registration
 const createUser = asyncHandler(
@@ -136,7 +138,7 @@ const logout = asyncHandler(async (req, res) => {
 
 const updateUser = asyncHandler(async (req, res) => {
   // console.log(req.User);
-  const { id } = req.User;
+  const { id } = req.user;
   validateMongoDbId(id);
   console.log(id);
   // console.log(req.params);
@@ -294,4 +296,62 @@ const updatePassword = asyncHandler(async (req, res) => {
   }
 });
 
-module.exports = { createUser, loginUser, updateUser, getAllUsers, getUser, deleteUser, blockUser, unblockUser, handleRefreshToken, logout, updatePassword };
+//forgetPasswordToken
+
+const forgetPasswordToken = asyncHandler(async (req, res) => {
+  const { email } = req.body;
+  const user = await User.findOne({ email });
+  if (!user) throw new Error("User not found with this email");
+
+  try {
+    const token = await user.createPasswordRestToken(); // FIXED
+    await user.save(); // Ensure to save the token in the database
+
+    const resetURL = `Hi, Please follow this link to reset your password. This link is valid for 10 minutes.
+    <a href="http://localhost:5000/api/user/reset-password/${token}">Click Here</a>`;
+
+    const data = {
+      to: email,
+      text: "Hey User",
+      subject: "Forget Password Link",
+      html: resetURL,
+    };
+    sendEmail(data);
+
+    res.json({
+      success: true,
+      token: token,
+      message: "Token sent to your email",
+    });
+
+  } catch (err) {
+    throw new Error(err);
+  }
+});
+
+//reset password
+
+const resetPassword = asyncHandler(async (req, res) => {
+
+  const {oldPassword, newPassword} = req.body;
+  const email = req.body.email;
+  const user = await User.findOne({email: email});
+  if (!user) throw new Error("User not found with this email");
+  user.password, oldPassword => bcrypt compare
+  // generate new hashed password
+  User.findOneAndUpdate({email: email}, {password: newHashedPassword})
+
+
+  // const { password } = req.body;
+  // const { token } = req.params;
+  // const hashedToken = crypto.createHash("sha256").update(token).digest("hex");
+  // const user = await User.findOne({
+  //   passwordResetToken: hashedToken, passwordResetTokenExpiresAt: { $gt: Date.Now() }
+  // });
+  // if (!user) throw new Error("Token Expire,please try again later");
+  // user.password = password;
+  // user.passwordResetToken = undefined;
+  // user.passwordResetTokenExpiresAt = undefined;
+});
+
+module.exports = { createUser, loginUser, updateUser, getAllUsers, getUser, deleteUser, blockUser, unblockUser, handleRefreshToken, logout, updatePassword, forgetPasswordToken };

@@ -6,6 +6,7 @@ const { notFound, errorHandler } = require('./middlewares/errorHandler.js');
 const cookieParser = require('cookie-parser');
 const productRouter = require("./routes/productRoute.js")
 const morgan = require('morgan');
+const blogRouter = require('./routes/blogRoutes.js')
 
 const app = express();
 
@@ -16,6 +17,7 @@ app.use(cookieParser()); //middleware to cookie parser
 
 app.use('/api/v1/user', authRouter);
 app.use('/api/v1/product', productRouter);
+app.use('/api/v1/blog', blogRouter);
 
 
 app.use(notFound);
