@@ -40,8 +40,8 @@ Payment Gateway: (e.g., Stripe, PayPal)
 
 Clone the repository:
 
-git clone https://github.com/sandhyasawwalkar1999/ecommerce.git
-cd ecommerce
+git clone https://github.com/sandhyasawalkar1999/ecomm.git
+cd ecomm
 
 ## Install dependencies:
 
@@ -53,10 +53,14 @@ Create a .env file in the root directory.
 
 Add the following environment variables:
 
-PORT=5000
+PORT=5000  
+
 MONGO_URI=your_mongodb_connection_string
+
 JWT_SECRET=your_jwt_secret
+
 COOKIE_SECRET=your_cookie_secret
+
 PAYMENT_GATEWAY_KEY=your_payment_gateway_key
 
 ## Start the server:
